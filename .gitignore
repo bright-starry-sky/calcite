@@ -25,6 +25,11 @@
 /buildSrc/build
 /buildSrc/subprojects/*/build
 
+caches
+daemon
+native
+wrapper
+
 # IDEA
 /out
 /*/out/

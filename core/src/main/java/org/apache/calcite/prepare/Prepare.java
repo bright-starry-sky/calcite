@@ -34,6 +34,7 @@ import org.apache.calcite.rel.RelCollation;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.logical.LogicalTableModify;
+import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeField;
 import org.apache.calcite.rex.RexExecutorImpl;
@@ -46,12 +47,8 @@ import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.Wrapper;
 import org.apache.calcite.schema.impl.ModifiableViewTable;
 import org.apache.calcite.schema.impl.StarTable;
-import org.apache.calcite.sql.SqlExplain;
-import org.apache.calcite.sql.SqlExplainFormat;
-import org.apache.calcite.sql.SqlExplainLevel;
-import org.apache.calcite.sql.SqlKind;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlOperatorTable;
+import org.apache.calcite.sql.*;
+import org.apache.calcite.sql.dialect.CalciteSqlDialect;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorCatalogReader;
@@ -169,10 +166,8 @@ public abstract class Prepare {
       LOGGER.debug("Plan after physical tweaks: {}",
           RelOptUtil.toString(rootRel4, SqlExplainLevel.ALL_ATTRIBUTES));
     }
-
     return root.withRel(rootRel4);
   }
-
   protected Program getProgram() {
     // Allow a test to override the default program.
     final Holder<Program> holder = Holder.of(null);
@@ -219,6 +214,7 @@ public abstract class Prepare {
       Class runtimeContextClass,
       SqlValidator validator,
       boolean needsValidation) {
+    LOGGER.info("optimized : {}", sqlQuery);
     init(runtimeContextClass);
 
     final SqlToRelConverter.ConfigBuilder builder =
